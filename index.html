@@ -30,7 +30,7 @@ button:active{transform:scale(.96)}
 .layer.one{bottom:0;height:78px}
 .layer.two{bottom:60px;height:65px;width:235px;left:22px;background:linear-gradient(#ffd0df,#ef91b5);box-shadow:inset 0 -8px #d97099}
 .plate{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:320px;height:22px;border-radius:50%;background:#fff8;box-shadow:0 5px 25px #0006}
-.candle{position:absolute;bottom:120px;width:9px;height:58px;border-radius:5px;background:repeating-linear-gradient(45deg,#fff 0 7px,#e58db0 7px 14px);z-index:3}
+.candle{position:absolute;width:7px;height:48px;border-radius:5px;background:repeating-linear-gradient(45deg,#fff 0 6px,#e58db0 6px 12px);z-index:3}
 .flame{position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:14px;height:22px;border-radius:50% 50% 50% 50%;background:#ffd76a;box-shadow:0 0 18px 6px #ffb34d;animation:flicker .12s infinite alternate}
 .flame.off{display:none}
 .smoke{position:absolute;top:-35px;left:50%;width:8px;height:30px;border-radius:50%;opacity:0}
@@ -101,25 +101,35 @@ let blown = false, audioCtx, analyser, stream, data;
 function makeCandles(){
   candles.forEach(c=>c.remove());
   candles=[];
-  const positions=[
-    [70,35],[105,28],[140,35],[175,28],[210,35],[245,28],
-    [88,65],[123,58],[158,65],[193,58],[228,65],
-    [106,88],[141,82],[176,88],[211,82]
+
+  // 24 candles: 12 in the back row + 12 in the front row.
+  // They sit neatly on the top cake layer instead of overlapping it.
+  const rows = [
+    {count:12, y:185, offset:0, z:2},
+    {count:12, y:190, offset:7, z:4}
   ];
-  // 24 candles arranged in 3 rows
-  const all=[];
-  for(let r=0;r<3;r++) for(let i=0;i<8;i++) all.push([55+i*24, r*28+18]);
-  all.forEach(([x,y])=>{
-    const c=document.createElement('div');
-    c.className='candle';
-    c.style.left=x+'px';
-    c.style.bottom=(125+y)+'px';
-    const f=document.createElement('div'); f.className='flame';
-    const s=document.createElement('div'); s.className='smoke';
-    c.append(f,s); cakeArea.appendChild(c); candles.push(c);
+
+  rows.forEach(row=>{
+    for(let i=0;i<row.count;i++){
+      const c=document.createElement('div');
+      c.className='candle';
+      c.style.width='7px';
+      c.style.height='48px';
+      c.style.left=(39 + i*18 + row.offset)+'px';
+      c.style.bottom=row.y+'px';
+      c.style.zIndex=row.z;
+
+      const f=document.createElement('div');
+      f.className='flame';
+      const sm=document.createElement('div');
+      sm.className='smoke';
+
+      c.append(f,sm);
+      cakeArea.appendChild(c);
+      candles.push(c);
+    }
   });
 }
-
 function addConfetti(){
   for(let i=0;i<100;i++){
     const x=document.createElement('i'); x.className='confetti';
@@ -146,9 +156,9 @@ function blowAll(){
   micBtn.classList.add('hidden');
   allOffBtn.classList.add('hidden');
   message.innerHTML=`<p><strong>สุขสันต์วันเกิดนะคะ 🎂💗</strong></p>
-  <p>ขอให้ปีที่ 24 เป็นปีที่ดีมาก ๆ<br>
+  <p>ขอให้ปีที่ 24 เป็นปีที่ดีมากๆ<br>
   เป็นปีที่มีแต่ความสุข โชคดี และความรักนะคะ</p>
-  <p>มีความสุขเยอะ ๆ และเจอแต่เรื่องดี ๆ เข้ามาในชีวิตนะ :)</p>
+  <p>มีความสุขเยอะๆและเจอแต่เรื่องดีๆเข้ามาในชีวิตนะ :)</p>
   <div style="font-size:2rem">🎂💗</div>`;
   addConfetti();
   if(stream) stream.getTracks().forEach(t=>t.stop());
