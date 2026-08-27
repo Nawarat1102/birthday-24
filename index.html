@@ -144,39 +144,19 @@ function makeCandles(){
   candles.forEach(c => c.remove());
   candles = [];
 
+  const cake = cakeArea.querySelector('.cake');
+
   const totalCandles = 12;
-  const candleWidth = 6;
+  const candleWidth = 7;
 
-  /*
-    cakeArea กว้าง 380px
-    cake อยู่ตรงกลาง และกว้าง 280px
-    ดังนั้น cake เริ่มที่ 50px
+  // หน้าเค้กชั้นบน
+  const topLeft = 22;
+  const topWidth = 235;
 
-    ชั้นบน:
-    left = 22px
-    width = 235px
+  // เว้นระยะจากขอบซ้ายและขวาของหน้าเค้ก
+  const padding = 14;
 
-    ตำแหน่งจริงของชั้นบนใน cakeArea:
-    50 + 22 = 72px
-    ถึง
-    72 + 235 = 307px
-  */
-
-  const cakeLeft = 50;
-  const cakeTopLeft = 22;
-  const cakeTopWidth = 235;
-
-  // ระยะขอบซ้าย-ขวา
-  const padding = 18;
-
-  const startX =
-    cakeLeft +
-    cakeTopLeft +
-    padding;
-
-  const usableWidth =
-    cakeTopWidth -
-    (padding * 2);
+  const usableWidth = topWidth - (padding * 2);
 
   const gap =
     (usableWidth - (totalCandles * candleWidth)) /
@@ -187,22 +167,34 @@ function makeCandles(){
     const c = document.createElement('div');
     c.className = 'candle';
 
-    // ตำแหน่งเทียน
+    /*
+      เทียนถูกสร้างให้อยู่ "ภายใน .cake"
+      จึงไม่ต้องคำนวณตำแหน่งกลางหน้าจออีก
+    */
+
     const xPos =
-      startX +
+      topLeft +
+      padding +
       i * (candleWidth + gap);
 
     c.style.left = xPos + 'px';
 
     /*
-      หน้าเค้กชั้นบนอยู่ที่ประมาณ y = 255px
+      .cake สูง 150px
 
-      candle สูง 45px
-      ดังนั้น bottom = 125px
-      จะทำให้ "โคนเทียน" แตะขอบบนของเค้กพอดี
+      ชั้นบน:
+      bottom: 60px
+      height: 65px
+
+      ดังนั้นขอบบนของชั้นบน =
+      150 - 60 - 65
+      = 25px
+
+      เทียนสูง 45px
+      ให้โคนเทียนเริ่มตรงขอบบน
     */
-    c.style.bottom = '125px';
 
+    c.style.bottom = '80px';
     c.style.zIndex = 3;
 
     const f = document.createElement('div');
@@ -213,7 +205,10 @@ function makeCandles(){
 
     c.append(f, sm);
 
-    cakeArea.appendChild(c);
+    // สำคัญมาก!
+    // ใส่เทียนเข้าไปใน .cake ไม่ใช่ cakeArea
+    cake.appendChild(c);
+
     candles.push(c);
   }
 }
