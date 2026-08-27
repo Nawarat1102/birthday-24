@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday 🎂</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{
+  overflow:hidden;background:radial-gradient(circle at 50% 25%,#3b254d 0,#171323 45%,#090811 100%);
+  color:#fff;touch-action:none
+}
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:22px}
+.hidden{display:none!important}
+.card{text-align:center;max-width:560px;width:100%;animation:fade .8s ease}
+h1{font-size:clamp(2.3rem,10vw,5rem);margin:.1em 0}
+h2{font-size:clamp(1.5rem,6vw,2.5rem);margin:.2em 0}
+p{font-size:clamp(1rem,4vw,1.25rem);line-height:1.8;margin:12px 0}
+button{
+  border:0;border-radius:999px;padding:15px 28px;font-size:1.05rem;font-weight:700;
+  cursor:pointer;background:#fff;color:#7b416d;box-shadow:0 8px 30px #0005;
+}
+button:active{transform:scale(.96)}
+.small{opacity:.75;font-size:.9rem}
+
+.cake-wrap{position:relative;width:min(90vw,380px);height:380px;margin:0 auto}
+.cake{position:absolute;left:50%;bottom:35px;transform:translateX(-50%);width:280px;height:150px}
+.layer{position:absolute;left:0;width:100%;border-radius:18px;background:linear-gradient(#f5a8c8,#d96f9e);box-shadow:inset 0 -10px #b95683}
+.layer.one{bottom:0;height:78px}
+.layer.two{bottom:60px;height:65px;width:235px;left:22px;background:linear-gradient(#ffd0df,#ef91b5);box-shadow:inset 0 -8px #d97099}
+.plate{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:320px;height:22px;border-radius:50%;background:#fff8;box-shadow:0 5px 25px #0006}
+.candle{position:absolute;bottom:120px;width:9px;height:58px;border-radius:5px;background:repeating-linear-gradient(45deg,#fff 0 7px,#e58db0 7px 14px);z-index:3}
+.flame{position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:14px;height:22px;border-radius:50% 50% 50% 50%;background:#ffd76a;box-shadow:0 0 18px 6px #ffb34d;animation:flicker .12s infinite alternate}
+.flame.off{display:none}
+.smoke{position:absolute;top:-35px;left:50%;width:8px;height:30px;border-radius:50%;opacity:0}
+.smoke.show{animation:smoke 1.3s ease-out forwards}
+.candle.off{opacity:.45}
+
+#message{margin-top:10px}
+.confetti{position:fixed;top:-15px;width:9px;height:16px;animation:fall 2.5s linear forwards;z-index:10}
+.mic-status{margin:10px auto;min-height:28px}
+#meter{width:min(300px,80vw);height:8px;border-radius:8px;background:#ffffff22;margin:12px auto;overflow:hidden}
+#meter span{display:block;height:100%;width:0;background:#fff;border-radius:8px;transition:width .05s}
+
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes flicker{from{transform:translateX(-50%) scale(.9) rotate(-3deg)}to{transform:translateX(-50%) scale(1.08) rotate(3deg)}}
+@keyframes smoke{0%{opacity:.55;transform:translate(-50%,0) scale(.8)}100%{opacity:0;transform:translate(-50%,-55px) scale(2.2)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<section id="start" class="screen">
+  <div class="card">
+    <div style="font-size:4rem">🎁</div>
+    <h2>มีอะไรจะให้ดูหน่อย 👀</h2>
+    <p>กดเปิดดูสิ</p>
+    <button id="openBtn">เปิดของขวัญ 💗</button>
+  </div>
+</section>
+
+<section id="birthday" class="screen hidden">
+  <div class="card">
+    <div class="cake-wrap" id="cakeArea">
+      <div class="plate"></div>
+      <div class="cake">
+        <div class="layer one"></div>
+        <div class="layer two"></div>
+      </div>
+    </div>
+    <h1>Happy Birthday! 🎂</h1>
+    <h2>24 แล้วนะ 💗</h2>
+    <p>เอาล่ะ... ถึงเวลาเป่าเทียนแล้ว 💨</p>
+    <div id="meter"><span></span></div>
+    <div class="mic-status" id="status">กดเริ่มใช้ไมค์ แล้วเป่าแรง ๆ ใส่โทรศัพท์นะ 🤭</div>
+    <button id="micBtn">💨 เริ่มเป่าเทียน</button>
+    <button id="allOffBtn" style="margin-left:6px">🎂 ดับเทียน</button>
+    <p class="small">ถ้าใช้ไมค์ไม่ได้ กด “ดับเทียน” แทนได้เลย</p>
+    <div id="message"></div>
+  </div>
+</section>
+
+<audio id="music" src="music.mp3" preload="auto"></audio>
+
+<script>
+const start = document.getElementById('start');
+const birthday = document.getElementById('birthday');
+const openBtn = document.getElementById('openBtn');
+const micBtn = document.getElementById('micBtn');
+const allOffBtn = document.getElementById('allOffBtn');
+const music = document.getElementById('music');
+const cakeArea = document.getElementById('cakeArea');
+const statusEl = document.getElementById('status');
+const meter = document.querySelector('#meter span');
+const message = document.getElementById('message');
+
+let candles = [];
+let blown = false, audioCtx, analyser, stream, data;
+
+function makeCandles(){
+  candles.forEach(c=>c.remove());
+  candles=[];
+  const positions=[
+    [70,35],[105,28],[140,35],[175,28],[210,35],[245,28],
+    [88,65],[123,58],[158,65],[193,58],[228,65],
+    [106,88],[141,82],[176,88],[211,82]
+  ];
+  // 24 candles arranged in 3 rows
+  const all=[];
+  for(let r=0;r<3;r++) for(let i=0;i<8;i++) all.push([55+i*24, r*28+18]);
+  all.forEach(([x,y])=>{
+    const c=document.createElement('div');
+    c.className='candle';
+    c.style.left=x+'px';
+    c.style.bottom=(125+y)+'px';
+    const f=document.createElement('div'); f.className='flame';
+    const s=document.createElement('div'); s.className='smoke';
+    c.append(f,s); cakeArea.appendChild(c); candles.push(c);
+  });
+}
+
+function addConfetti(){
+  for(let i=0;i<100;i++){
+    const x=document.createElement('i'); x.className='confetti';
+    x.style.left=Math.random()*100+'vw';
+    x.style.animationDelay=Math.random()*.8+'s';
+    x.style.transform=`rotate(${Math.random()*360}deg)`;
+    x.textContent=['🎉','✨','💗','🎊'][Math.floor(Math.random()*4)];
+    document.body.appendChild(x);
+    setTimeout(()=>x.remove(),3500);
+  }
+}
+
+function blowAll(){
+  if(blown) return;
+  blown=true;
+  candles.forEach((c,i)=>{
+    c.classList.add('off');
+    c.querySelector('.flame').classList.add('off');
+    const s=c.querySelector('.smoke'); s.classList.remove('show'); void s.offsetWidth; s.classList.add('show');
+    setTimeout(()=>{},i*15);
+  });
+  meter.style.width='0';
+  statusEl.textContent='เย้! เป่าสำเร็จแล้ว 🎉';
+  micBtn.classList.add('hidden');
+  allOffBtn.classList.add('hidden');
+  message.innerHTML=`<p><strong>สุขสันต์วันเกิดนะคะ 🎂💗</strong></p>
+  <p>ขอให้ปีที่ 24 เป็นปีที่ดีมาก ๆ<br>
+  เป็นปีที่มีแต่ความสุข โชคดี และความรักนะคะ</p>
+  <p>มีความสุขเยอะ ๆ และเจอแต่เรื่องดี ๆ เข้ามาในชีวิตนะ :)</p>
+  <div style="font-size:2rem">🎂💗</div>`;
+  addConfetti();
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+}
+
+openBtn.addEventListener('click',()=>{
+  start.classList.add('hidden');
+  birthday.classList.remove('hidden');
+  makeCandles();
+  music.volume=.65;
+  music.play().catch(()=>{});
+});
+
+allOffBtn.addEventListener('click', blowAll);
+
+micBtn.addEventListener('click', async ()=>{
+  if(!navigator.mediaDevices?.getUserMedia){
+    statusEl.textContent='เบราว์เซอร์นี้ใช้ไมค์ไม่ได้ กด “ดับเทียน” แทนได้เลย';
+    return;
+  }
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const source=audioCtx.createMediaStreamSource(stream);
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=512;
+    source.connect(analyser);
+    data=new Uint8Array(analyser.fftSize);
+    micBtn.textContent='💨 เป่าเลย!';
+    statusEl.textContent='พร้อมแล้ว! เป่าใส่ไมค์แรง ๆ เลย 💨';
+    detectBlow();
+  }catch(e){
+    statusEl.textContent='เปิดไมค์ไม่ได้ 😭 กด “ดับเทียน” แทนได้เลย';
+  }
+});
+
+let loudSince=0;
+function detectBlow(){
+  if(blown || !analyser) return;
+  analyser.getByteTimeDomainData(data);
+  let sum=0;
+  for(const v of data){ const n=(v-128)/128; sum+=n*n; }
+  const rms=Math.sqrt(sum/data.length);
+  const level=Math.min(100,rms*260);
+  meter.style.width=level+'%';
+  if(level>28){
+    if(!loudSince) loudSince=performance.now();
+    if(performance.now()-loudSince>180){ blowAll(); return; }
+  }else loudSince=0;
+  requestAnimationFrame(detectBlow);
+}
+
+// Also allow touch/mouse swipe across the candle area as a backup.
+let dragging=false;
+function checkTouch(x,y){
+  candles.forEach(c=>{
+    const r=c.getBoundingClientRect();
+    if(x>=r.left-18 && x<=r.right+18 && y>=r.top-20 && y<=r.bottom+10){
+      c.classList.add('off');
+      c.querySelector('.flame').classList.add('off');
+      c.querySelector('.smoke').classList.add('show');
+    }
+  });
+  if(candles.length && candles.every(c=>c.classList.contains('off'))) blowAll();
+}
+cakeArea.addEventListener('pointerdown',e=>{dragging=true;checkTouch(e.clientX,e.clientY)});
+cakeArea.addEventListener('pointermove',e=>{if(dragging)checkTouch(e.clientX,e.clientY)});
+window.addEventListener('pointerup',()=>dragging=false);
+</script>
+</body>
+</html>
