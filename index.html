@@ -123,20 +123,22 @@ function makeCandles(){
   const candleWidth = 7;
   const gap = 2;
 
-  // 12 เล่มต่อแถว
+  // คำนวณให้เทียนทั้งแถวอยู่กึ่งกลางหน้าเค้ก
   const totalWidth = 12 * candleWidth + 11 * gap;
   const startX = (cakeWidth - totalWidth) / 2;
 
   const rows = [
-    {bottom:160, offset:0},
-    {bottom:160, offset:8}
+    {bottom:160, offset:-4},
+    {bottom:160, offset:4}
   ];
 
   rows.forEach(row=>{
     for(let i=0;i<12;i++){
+
       const c=document.createElement('div');
       c.className='candle';
 
+      // ตำแหน่งเทียน
       c.style.left=(51 + startX + i*(candleWidth+gap) + row.offset)+'px';
       c.style.bottom=row.bottom+'px';
       c.style.zIndex=3;
