@@ -50,7 +50,7 @@ button:active{transform:scale(.96)}
 
 .candle{
   position:absolute;
-  width:7px;
+  width:6px;
   height:50px;
   border-radius:3px;
   background:repeating-linear-gradient(0deg,#fff 0 8px,#ffb6c1 8px 16px);
@@ -63,7 +63,7 @@ button:active{transform:scale(.96)}
   top:-26px;
   left:50%;
   transform:translateX(-50%);
-  width:12px;
+  width:11px;
   height:20px;
   border-radius:50% 50% 20% 20%;
   background:linear-gradient(#fff, #ffda73, #ff933b);
@@ -140,17 +140,20 @@ function makeCandles(){
   candles.forEach(c=>c.remove());
   candles=[];
 
-  const totalCandles = 12; // กลับมาเป็น 12 เล่มตามเดิม
-  const candleWidth = 7;
+  const totalCandles = 12; // 12 เล่มถ้วน
+  const candleWidth = 6;
   
-  // ฐานเค้กหลักกว้าง 280px จัดกึ่งกลางจอ (left: 50%, translateX(-50%))
-  // เค้กชั้นบนกว้าง 235px อยู่เยื้องซ้ายเล็กน้อย (left: 22px ของกล่องเค้กหลัก)
-  // คำนวณจุดกึ่งกลางของเค้กชั้นบนให้อยู่ตรงกลางพอดี และขยับมาทางขวาให้อยู่บนหน้าเค้กสวยงาม
+  // เค้กชั้นบนเริ่มที่ left: 22px, กว้าง 235px
   const cakeTopLeft = 22;
   const cakeTopWidth = 235;
-  const availableWidth = cakeTopWidth - 30; // เว้นขอบซ้ายขวา
-  const gap = (availableWidth - (totalCandles * candleWidth)) / (totalCandles - 1);
-  const startX = cakeTopLeft + 15; // จุดเริ่มต้นวางเทียนฝั่งซ้ายของเค้กชั้นบน
+  
+  // เว้นขอบซ้ายขวาฝั่งละ 18px เพื่อไม่ให้เทียนตกขอบเค้กชั้นบน
+  const padding = 18;
+  const usableWidth = cakeTopWidth - (padding * 2);
+  const startX = cakeTopLeft + padding;
+  
+  // คำนวณระยะห่างระหว่างเทียนแต่ละเล่มให้อัตโนมัติเพื่อให้เต็มพื้นที่พอดี
+  const gap = totalCandles > 1 ? (usableWidth - (totalCandles * candleWidth)) / (totalCandles - 1) : 0;
 
   for(let i=0; i<totalCandles; i++){
     const c = document.createElement('div');
@@ -158,7 +161,7 @@ function makeCandles(){
 
     const xPos = startX + i * (candleWidth + gap);
     c.style.left = xPos + 'px';
-    c.style.bottom = '125px'; // วางบนหน้าเค้กชั้นบนพอดี
+    c.style.bottom = '125px';
     c.style.zIndex = 3;
 
     const f = document.createElement('div');
