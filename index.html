@@ -47,8 +47,30 @@ button:active{transform:scale(.96)}
 .layer.one{bottom:0;height:78px}
 .layer.two{bottom:60px;height:65px;width:235px;left:22px;background:linear-gradient(#ffd0df,#ef91b5);box-shadow:inset 0 -8px #d97099}
 .plate{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:320px;height:22px;border-radius:50%;background:#fff8;box-shadow:0 5px 25px #0006}
-.candle{position:absolute;width:7px;height:48px;border-radius:5px;background:repeating-linear-gradient(45deg,#fff 0 6px,#e58db0 6px 12px);z-index:3;transform:rotate(0deg);}
-.flame{position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:14px;height:22px;border-radius:50% 50% 50% 50%;background:#ffd76a;box-shadow:0 0 18px 6px #ffb34d;animation:flicker .12s infinite alternate}
+
+/* ปรับสไตล์เทียนและเปลวไฟให้สวยงาม ไม่แน่น ไม่อียง */
+.candle{
+  position:absolute;
+  width:8px;
+  height:52px;
+  border-radius:4px;
+  background:repeating-linear-gradient(0deg,#fff 0 8px,#ffb6c1 8px 16px);
+  z-index:3;
+  transform:none; /* ลบการเอียงออก ตั้งตรงสวยงาม */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.flame{
+  position:absolute;
+  top:-26px;
+  left:50%;
+  transform:translateX(-50%);
+  width:12px;
+  height:20px;
+  border-radius:50% 50% 20% 20%;
+  background:linear-gradient(#fff, #ffda73, #ff933b);
+  box-shadow:0 0 12px 3px rgba(255,179,77,0.6);
+  animation:flicker .15s infinite alternate;
+}
 .flame.off{display:none}
 .smoke{position:absolute;top:-35px;left:50%;width:8px;height:30px;border-radius:50%;opacity:0}
 .smoke.show{animation:smoke 1.3s ease-out forwards}
@@ -61,7 +83,7 @@ button:active{transform:scale(.96)}
 #meter span{display:block;height:100%;width:0;background:#fff;border-radius:8px;transition:width .05s}
 
 @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@keyframes flicker{from{transform:translateX(-50%) scale(.9) rotate(-3deg)}to{transform:translateX(-50%) scale(1.08) rotate(3deg)}}
+@keyframes flicker{from{transform:translateX(-50%) scale(.95); opacity:.9;} to{transform:translateX(-50%) scale(1.05); opacity:1;}}
 @keyframes smoke{0%{opacity:.55;transform:translate(-50%,0) scale(.8)}100%{opacity:0;transform:translate(-50%,-55px) scale(2.2)}}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
 </style>
@@ -119,42 +141,37 @@ function makeCandles(){
   candles.forEach(c=>c.remove());
   candles=[];
 
-  const cakeWidth = 235;
-  const candleWidth = 7;
-  const gap = 2;
+  const totalCandles = 12;
+  const cakeWidth = 235; // ความกว้างของเค้กชั้นบน
+  const candleWidth = 8;
+  
+  // คำนวณระยะห่างเพื่อให้เทียน 12 เล่มเรียงแถวเดียวสวยๆ อยู่กลางเค้กพอดี ไม่แน่นเกินไป
+  const availableWidth = cakeWidth - 40; // เว้นขอบซ้ายขวาอย่างละ 20px
+  const gap = (availableWidth - (totalCandles * candleWidth)) / (totalCandles - 1);
+  const startX = 22 + 20; // เริ่มจากตำแหน่งเค้กชั้นบน + ขอบซ้าย
 
-  // คำนวณให้เทียนทั้งแถวอยู่กึ่งกลางหน้าเค้ก
-  const totalWidth = 12 * candleWidth + 11 * gap;
-  const startX = (cakeWidth - totalWidth) / 2;
+  for(let i=0; i<totalCandles; i++){
+    const c = document.createElement('div');
+    c.className = 'candle';
 
-  const rows = [
-    {bottom:160, offset:-4},
-    {bottom:160, offset:4}
-  ];
+    // คำนวณตำแหน่ง X ของเทียนแต่ละเล่มให้กระจายตัวเท่าๆ กัน
+    const xPos = startX + i * (candleWidth + gap);
+    c.style.left = xPos + 'px';
+    c.style.bottom = '155px'; // วางบนหน้าเค้กพอดี
+    c.style.zIndex = 3;
 
-  rows.forEach(row=>{
-    for(let i=0;i<12;i++){
+    const f = document.createElement('div');
+    f.className = 'flame';
 
-      const c=document.createElement('div');
-      c.className='candle';
+    const sm = document.createElement('div');
+    sm.className = 'smoke';
 
-      // ตำแหน่งเทียน
-      c.style.left=(51 + startX + i*(candleWidth+gap) + row.offset)+'px';
-      c.style.bottom=row.bottom+'px';
-      c.style.zIndex=3;
-
-      const f=document.createElement('div');
-      f.className='flame';
-
-      const sm=document.createElement('div');
-      sm.className='smoke';
-
-      c.append(f,sm);
-      cakeArea.appendChild(c);
-      candles.push(c);
-    }
-  });
+    c.append(f, sm);
+    cakeArea.appendChild(c);
+    candles.push(c);
+  }
 }
+
 function addConfetti(){
   for(let i=0;i<100;i++){
     const x=document.createElement('i'); x.className='confetti';
@@ -255,10 +272,9 @@ function detectBlow(){
     sum += n * n;
   }
   const rms = Math.sqrt(sum / data.length);
-  // ความไวของไมค์
   const level = Math.min(100, rms * 700);
   meter.style.width = level + '%';
-  // ต้องมีเสียงเป่าต่อเนื่องก่อนจึงจะดับ
+  
   if(level > 18){
     if(!loudSince){
       loudSince = performance.now();
@@ -273,7 +289,6 @@ function detectBlow(){
   requestAnimationFrame(detectBlow);
 }
 
-// Also allow touch/mouse swipe across the candle area as a backup.
 let dragging=false;
 function checkTouch(x,y){
   candles.forEach(c=>{
