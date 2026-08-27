@@ -48,27 +48,27 @@ button:active{transform:scale(.96)}
 .layer.two{bottom:60px;height:65px;width:235px;left:22px;background:linear-gradient(#ffd0df,#ef91b5);box-shadow:inset 0 -8px #d97099}
 .plate{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:320px;height:22px;border-radius:50%;background:#fff8;box-shadow:0 5px 25px #0006}
 
-/* ปรับสไตล์เทียนและเปลวไฟให้สวยงาม ไม่แน่น ไม่อียง */
+/* ปรับสไตล์เทียนและเปลวไฟให้สวยงาม กระจายตัวพอดี ไม่แน่น ไม่เอียง */
 .candle{
   position:absolute;
-  width:8px;
-  height:52px;
-  border-radius:4px;
+  width:10px;
+  height:50px;
+  border-radius:5px;
   background:repeating-linear-gradient(0deg,#fff 0 8px,#ffb6c1 8px 16px);
   z-index:3;
-  transform:none; /* ลบการเอียงออก ตั้งตรงสวยงาม */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transform:none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.25);
 }
 .flame{
   position:absolute;
-  top:-26px;
+  top:-28px;
   left:50%;
   transform:translateX(-50%);
-  width:12px;
-  height:20px;
+  width:14px;
+  height:22px;
   border-radius:50% 50% 20% 20%;
   background:linear-gradient(#fff, #ffda73, #ff933b);
-  box-shadow:0 0 12px 3px rgba(255,179,77,0.6);
+  box-shadow:0 0 14px 4px rgba(255,179,77,0.7);
   animation:flicker .15s infinite alternate;
 }
 .flame.off{display:none}
@@ -141,23 +141,22 @@ function makeCandles(){
   candles.forEach(c=>c.remove());
   candles=[];
 
-  const totalCandles = 12;
-  const cakeWidth = 235; // ความกว้างของเค้กชั้นบน
-  const candleWidth = 8;
+  const totalCandles = 7; // ปรับเหลือ 7 เล่ม เพื่อให้เรียงสวย ไม่แน่นเกินไป
+  const cakeWidth = 235; // ความกว้างเค้กชั้นบน
+  const candleWidth = 10;
   
-  // คำนวณระยะห่างเพื่อให้เทียน 12 เล่มเรียงแถวเดียวสวยๆ อยู่กลางเค้กพอดี ไม่แน่นเกินไป
-  const availableWidth = cakeWidth - 40; // เว้นขอบซ้ายขวาอย่างละ 20px
+  // คำนวณระยะห่างให้อยู่กึ่งกลางและกระจายสวยงามบนหน้าเค้ก
+  const availableWidth = cakeWidth - 50; 
   const gap = (availableWidth - (totalCandles * candleWidth)) / (totalCandles - 1);
-  const startX = 22 + 20; // เริ่มจากตำแหน่งเค้กชั้นบน + ขอบซ้าย
+  const startX = 22 + 25; // ตำแหน่งเริ่มต้นบนเค้กชั้นบน
 
   for(let i=0; i<totalCandles; i++){
     const c = document.createElement('div');
     c.className = 'candle';
 
-    // คำนวณตำแหน่ง X ของเทียนแต่ละเล่มให้กระจายตัวเท่าๆ กัน
     const xPos = startX + i * (candleWidth + gap);
     c.style.left = xPos + 'px';
-    c.style.bottom = '155px'; // วางบนหน้าเค้กพอดี
+    c.style.bottom = '125px'; // วางบนหน้าเค้กชั้นบนพอดี ไม่จมและไม่ลอย
     c.style.zIndex = 3;
 
     const f = document.createElement('div');
