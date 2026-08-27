@@ -8,10 +8,18 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 body{
-  overflow:hidden;background:radial-gradient(circle at 50% 25%,#3b254d 0,#171323 45%,#090811 100%);
-  color:#fff;touch-action:none
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:radial-gradient(circle at 50% 25%,#3b254d 0,#171323 45%,#090811 100%);
+  color:#fff;
 }
-.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:22px}
+.screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+}
 .hidden{display:none!important}
 .card{text-align:center;max-width:560px;width:100%;animation:fade .8s ease}
 h1{font-size:clamp(2.3rem,10vw,5rem);margin:.1em 0}
@@ -112,8 +120,8 @@ function makeCandles(){
       const c=document.createElement('div');
       c.className='candle';
 
-      c.style.left=(78 + i*15 + row.offset)+'px';
-      c.style.bottom=row.bottom+'px';
+      c.style.left=(55 + i*15 + row.offset)+'px';
+      c.style.bottom=160+'px';
       c.style.zIndex=3;
 
       const f=document.createElement('div');
