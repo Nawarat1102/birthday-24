@@ -48,7 +48,6 @@ button:active{transform:scale(.96)}
 .layer.two{bottom:60px;height:65px;width:235px;left:22px;background:linear-gradient(#ffd0df,#ef91b5);box-shadow:inset 0 -8px #d97099}
 .plate{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:320px;height:22px;border-radius:50%;background:#fff8;box-shadow:0 5px 25px #0006}
 
-/* ปรับสไตล์เทียนและเปลวไฟให้สวยงาม กระจายตัวพอดี ไม่แน่น ไม่เอียง */
 .candle{
   position:absolute;
   width:10px;
@@ -141,14 +140,15 @@ function makeCandles(){
   candles.forEach(c=>c.remove());
   candles=[];
 
-  const totalCandles = 7; // ปรับเหลือ 7 เล่ม เพื่อให้เรียงสวย ไม่แน่นเกินไป
-  const cakeWidth = 235; // ความกว้างเค้กชั้นบน
+  const totalCandles = 7;
   const candleWidth = 10;
   
-  // คำนวณระยะห่างให้อยู่กึ่งกลางและกระจายสวยงามบนหน้าเค้ก
-  const availableWidth = cakeWidth - 50; 
-  const gap = (availableWidth - (totalCandles * candleWidth)) / (totalCandles - 1);
-  const startX = 22 + 25; // ตำแหน่งเริ่มต้นบนเค้กชั้นบน
+  // จัดให้อยู่กึ่งกลางเค้กชั้นบนพอดิบพอดี (เค้กชั้นบนกว้าง 235px เริ่มที่ left: 22px)
+  const cakeLeft = 22;
+  const cakeWidth = 235;
+  const totalWidthNeeded = (totalCandles * candleWidth) + ((totalCandles - 1) * 14); // กำหนดระยะห่างช่องไฟ (gap) 14px ให้สวยกำลังดี
+  const gap = 14;
+  const startX = cakeLeft + (cakeWidth - ((totalCandles * candleWidth) + ((totalCandles - 1) * gap))) / 2;
 
   for(let i=0; i<totalCandles; i++){
     const c = document.createElement('div');
@@ -156,7 +156,7 @@ function makeCandles(){
 
     const xPos = startX + i * (candleWidth + gap);
     c.style.left = xPos + 'px';
-    c.style.bottom = '125px'; // วางบนหน้าเค้กชั้นบนพอดี ไม่จมและไม่ลอย
+    c.style.bottom = '125px';
     c.style.zIndex = 3;
 
     const f = document.createElement('div');
