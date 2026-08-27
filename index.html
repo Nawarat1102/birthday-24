@@ -51,7 +51,7 @@ button:active{transform:scale(.96)}
 .candle{
   position:absolute;
   width:6px;
-  height:50px;
+  height:45px;
   border-radius:3px;
   background:repeating-linear-gradient(0deg,#fff 0 8px,#ffb6c1 8px 16px);
   z-index:3;
@@ -60,18 +60,18 @@ button:active{transform:scale(.96)}
 }
 .flame{
   position:absolute;
-  top:-26px;
+  top:-24px;
   left:50%;
   transform:translateX(-50%);
   width:11px;
-  height:20px;
+  height:18px;
   border-radius:50% 50% 20% 20%;
   background:linear-gradient(#fff, #ffda73, #ff933b);
   box-shadow:0 0 12px 3px rgba(255,179,77,0.6);
   animation:flicker .15s infinite alternate;
 }
 .flame.off{display:none}
-.smoke{position:absolute;top:-35px;left:50%;width:8px;height:30px;border-radius:50%;opacity:0}
+.smoke{position:absolute;top:-32px;left:50%;width:8px;height:26px;border-radius:50%;opacity:0}
 .smoke.show{animation:smoke 1.3s ease-out forwards}
 .candle.off{opacity:.45}
 
@@ -83,7 +83,7 @@ button:active{transform:scale(.96)}
 
 @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes flicker{from{transform:translateX(-50%) scale(.95); opacity:.9;} to{transform:translateX(-50%) scale(1.05); opacity:1;}}
-@keyframes smoke{0%{opacity:.55;transform:translate(-50%,0) scale(.8)}100%{opacity:0;transform:translate(-50%,-55px) scale(2.2)}}
+@keyframes smoke{0%{opacity:.55;transform:translate(-50%,0) scale(.8)}100%{opacity:0;transform:translate(-50%,-50px) scale(2.2)}}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
 </style>
 </head>
@@ -140,20 +140,19 @@ function makeCandles(){
   candles.forEach(c=>c.remove());
   candles=[];
 
-  const totalCandles = 12; // 12 เล่มถ้วน
+  const totalCandles = 12;
   const candleWidth = 6;
   
-  // เค้กชั้นบนเริ่มที่ left: 22px, กว้าง 235px
+  // อ้างอิงพิกัดเค้กชั้นบน (left: 22px, width: 235px)
   const cakeTopLeft = 22;
   const cakeTopWidth = 235;
   
-  // เว้นขอบซ้ายขวาฝั่งละ 18px เพื่อไม่ให้เทียนตกขอบเค้กชั้นบน
-  const padding = 18;
+  // เว้นขอบซ้ายขวาฝั่งละ 20px เพื่อให้เทียนอยู่บนหน้าเค้กพอดีไม่ตกขอบ
+  const padding = 20;
   const usableWidth = cakeTopWidth - (padding * 2);
   const startX = cakeTopLeft + padding;
   
-  // คำนวณระยะห่างระหว่างเทียนแต่ละเล่มให้อัตโนมัติเพื่อให้เต็มพื้นที่พอดี
-  const gap = totalCandles > 1 ? (usableWidth - (totalCandles * candleWidth)) / (totalCandles - 1) : 0;
+  const gap = (usableWidth - (totalCandles * candleWidth)) / (totalCandles - 1);
 
   for(let i=0; i<totalCandles; i++){
     const c = document.createElement('div');
@@ -161,7 +160,7 @@ function makeCandles(){
 
     const xPos = startX + i * (candleWidth + gap);
     c.style.left = xPos + 'px';
-    c.style.bottom = '125px';
+    c.style.bottom = '120px'; // ดึงฐานเทียนให้ขึ้นมาอยู่บนขอบหน้าเค้กชั้นบนพอดี ไม่จมลงไปข้างล่าง
     c.style.zIndex = 3;
 
     const f = document.createElement('div');
