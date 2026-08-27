@@ -50,13 +50,17 @@ button:active{transform:scale(.96)}
 
 .candle{
   position:absolute;
-  width:6px;
+  width:7px;
   height:45px;
   border-radius:3px;
-  background:repeating-linear-gradient(0deg,#fff 0 8px,#ffb6c1 8px 16px);
+  background:repeating-linear-gradient(
+    0deg,
+    #fff 0 8px,
+    #ffb6c1 8px 16px
+  );
   z-index:3;
   transform:none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow:0 2px 4px rgba(0,0,0,0.2);
 }
 .flame{
   position:absolute;
@@ -137,30 +141,68 @@ let candles = [];
 let blown = false, audioCtx, analyser, stream, data;
 
 function makeCandles(){
-  candles.forEach(c=>c.remove());
-  candles=[];
+  candles.forEach(c => c.remove());
+  candles = [];
 
   const totalCandles = 12;
   const candleWidth = 6;
-  
-  // อ้างอิงพิกัดเค้กชั้นบน (left: 22px, width: 235px)
+
+  /*
+    cakeArea กว้าง 380px
+    cake อยู่ตรงกลาง และกว้าง 280px
+    ดังนั้น cake เริ่มที่ 50px
+
+    ชั้นบน:
+    left = 22px
+    width = 235px
+
+    ตำแหน่งจริงของชั้นบนใน cakeArea:
+    50 + 22 = 72px
+    ถึง
+    72 + 235 = 307px
+  */
+
+  const cakeLeft = 50;
   const cakeTopLeft = 22;
   const cakeTopWidth = 235;
-  
-  // เว้นขอบซ้ายขวาฝั่งละ 20px เพื่อให้เทียนอยู่บนหน้าเค้กพอดีไม่ตกขอบ
-  const padding = 20;
-  const usableWidth = cakeTopWidth - (padding * 2);
-  const startX = cakeTopLeft + padding;
-  
-  const gap = (usableWidth - (totalCandles * candleWidth)) / (totalCandles - 1);
 
-  for(let i=0; i<totalCandles; i++){
+  // ระยะขอบซ้าย-ขวา
+  const padding = 18;
+
+  const startX =
+    cakeLeft +
+    cakeTopLeft +
+    padding;
+
+  const usableWidth =
+    cakeTopWidth -
+    (padding * 2);
+
+  const gap =
+    (usableWidth - (totalCandles * candleWidth)) /
+    (totalCandles - 1);
+
+  for(let i = 0; i < totalCandles; i++){
+
     const c = document.createElement('div');
     c.className = 'candle';
 
-    const xPos = startX + i * (candleWidth + gap);
+    // ตำแหน่งเทียน
+    const xPos =
+      startX +
+      i * (candleWidth + gap);
+
     c.style.left = xPos + 'px';
-    c.style.bottom = '120px'; // ดึงฐานเทียนให้ขึ้นมาอยู่บนขอบหน้าเค้กชั้นบนพอดี ไม่จมลงไปข้างล่าง
+
+    /*
+      หน้าเค้กชั้นบนอยู่ที่ประมาณ y = 255px
+
+      candle สูง 45px
+      ดังนั้น bottom = 125px
+      จะทำให้ "โคนเทียน" แตะขอบบนของเค้กพอดี
+    */
+    c.style.bottom = '125px';
+
     c.style.zIndex = 3;
 
     const f = document.createElement('div');
@@ -170,6 +212,7 @@ function makeCandles(){
     sm.className = 'smoke';
 
     c.append(f, sm);
+
     cakeArea.appendChild(c);
     candles.push(c);
   }
