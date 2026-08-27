@@ -102,25 +102,23 @@ function makeCandles(){
   candles.forEach(c=>c.remove());
   candles=[];
 
-  // 24 candles: 12 in the back row + 12 in the front row.
-  // They sit neatly on the top cake layer instead of overlapping it.
   const rows = [
-    {count:12, y:185, offset:0, z:2},
-    {count:12, y:190, offset:7, z:4}
+    {count:12, bottom:160, offset:0},
+    {count:12, bottom:160, offset:7}
   ];
 
   rows.forEach(row=>{
     for(let i=0;i<row.count;i++){
       const c=document.createElement('div');
       c.className='candle';
-      c.style.width='7px';
-      c.style.height='48px';
-      c.style.left=(39 + i*18 + row.offset)+'px';
-      c.style.bottom=row.y+'px';
-      c.style.zIndex=row.z;
+
+      c.style.left=(78 + i*15 + row.offset)+'px';
+      c.style.bottom=row.bottom+'px';
+      c.style.zIndex=3;
 
       const f=document.createElement('div');
       f.className='flame';
+
       const sm=document.createElement('div');
       sm.className='smoke';
 
@@ -179,35 +177,72 @@ micBtn.addEventListener('click', async ()=>{
     statusEl.textContent='เบราว์เซอร์นี้ใช้ไมค์ไม่ได้ กด “ดับเทียน” แทนได้เลย';
     return;
   }
+
   try{
-    stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    const source=audioCtx.createMediaStreamSource(stream);
-    analyser=audioCtx.createAnalyser();
-    analyser.fftSize=512;
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio:{
+        echoCancellation:true,
+        noiseSuppression:false,
+        autoGainControl:false
+      }
+    });
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    if(audioCtx.state === 'suspended'){
+      await audioCtx.resume();
+    }
+
+    const source = audioCtx.createMediaStreamSource(stream);
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.2;
+
     source.connect(analyser);
-    data=new Uint8Array(analyser.fftSize);
+
+    data = new Uint8Array(analyser.fftSize);
+
+    loudSince = 0;
+
     micBtn.textContent='💨 เป่าเลย!';
-    statusEl.textContent='พร้อมแล้ว! เป่าใส่ไมค์แรง ๆ เลย 💨';
+    statusEl.textContent='พร้อมแล้ว! เป่าใส่ไมค์เลย 💨';
+
     detectBlow();
+
   }catch(e){
+    console.error(e);
     statusEl.textContent='เปิดไมค์ไม่ได้ 😭 กด “ดับเทียน” แทนได้เลย';
   }
 });
 
-let loudSince=0;
+let loudSince = 0;
+
 function detectBlow(){
   if(blown || !analyser) return;
   analyser.getByteTimeDomainData(data);
-  let sum=0;
-  for(const v of data){ const n=(v-128)/128; sum+=n*n; }
-  const rms=Math.sqrt(sum/data.length);
-  const level=Math.min(100,rms*260);
-  meter.style.width=level+'%';
-  if(level>28){
-    if(!loudSince) loudSince=performance.now();
-    if(performance.now()-loudSince>180){ blowAll(); return; }
-  }else loudSince=0;
+
+  let sum = 0;
+  for(let i=0;i<data.length;i++){
+    const n = (data[i] - 128) / 128;
+    sum += n * n;
+  }
+  const rms = Math.sqrt(sum / data.length);
+  // ความไวของไมค์
+  const level = Math.min(100, rms * 700);
+  meter.style.width = level + '%';
+  // ต้องมีเสียงเป่าต่อเนื่องก่อนจึงจะดับ
+  if(level > 18){
+    if(!loudSince){
+      loudSince = performance.now();
+    }
+    if(performance.now() - loudSince > 300){
+      blowAll();
+      return;
+    }
+  }else{
+    loudSince = 0;
+  }
   requestAnimationFrame(detectBlow);
 }
 
